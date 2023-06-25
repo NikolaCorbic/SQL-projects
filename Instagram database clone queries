@@ -1,0 +1,47 @@
+-- Find the 5 oldest users
+SELECT username,created_at FROM instagram_users
+ORDER BY created_at ASC
+LIMIT 5;
+
+-- What day of the week do most users register?
+
+SELECT DAYNAME (created_at) AS day,
+COUNT(*) AS total FROM instagram_users
+GROUP BY day
+ORDER BY total DESC
+LIMIT 2;
+
+-- Find the users who have never posted a photo
+
+SELECT username,image_url FROM instagram_users
+ LEFT JOIN instagram_photos ON instagram_users.id = instagram_photos.user_id
+WHERE instagram_photos.id IS NULL;
+
+-- Identify the most liked photo and the person who posted it
+
+SELECT username,instagram_photos.id,instagram_photos.image_url, COUNT(*) AS total FROM instagram_photos
+INNER JOIN instagram_likes ON instagram_likes.photo_id = instagram_photos.id
+INNER JOIN instagram_users ON instagram_photos.user_id = instagram_users.id
+GROUP BY instagram_photos.id
+ORDER BY total DESC
+LIMIT 1;
+
+-- How many times does the average user post? Calculate the average number of photos per user.
+
+SELECT COUNT(*) FROM instagram_photos;
+SELECT COUNT(*) FROM instagram_users;
+SELECT (SELECT COUNT(*) FROM instagram_photos)/(SELECT COUNT(*) FROM instagram_users) AS average_number_of_posts_per_user;
+
+-- What are the top 5 most commonly used hashtags?
+
+SELECT instagram_hashtags.hashtag_name, COUNT(*) AS total FROM instagram_photo_tags
+JOIN instagram_hashtags ON instagram_photo_tags.hashtag_id = instagram_hashtags.id
+GROUP BY instagram_hashtags.id
+ORDER BY total DESC
+LIMIT 5;
+
+-- Find the number of users who have liked every single photo
+SELECT username, COUNT(*) AS number_of_likes FROM instagram_users
+INNER JOIN instagram_likes ON instagram_users.id = instagram_likes.user_id
+GROUP BY instagram_likes.user_id
+HAVING number_of_likes = (SELECT COUNT(*) FROM instagram_photos);
